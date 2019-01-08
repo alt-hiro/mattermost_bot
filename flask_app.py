@@ -1,27 +1,37 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Dec 27 18:31:48 2018
-
-@author: takano.hiroyuki
-"""
 
 # server.py
-import json
+import message
+
 from flask import Flask, request
+import slackweb
 
 app = Flask(__name__)
 
+msglist = message.getAllMessage()
 """
 @app.route('/')
 def index():
     return 'Hello'
 """
-@app.route('/matter', methods=['POST'])
+@app.route('/', methods=['POST'])
 def post():
-    data = request.json
-    print(data)
-    return json.dumps(dict())
+    _returnMessage()
+    print(request.headers)
+    print("body: %s" % request.data)
+    return request.data
+
+def _returnMessage():
+    mattermost = slackweb.Slack(url="http://52.195.12.149:8065/hooks/4q13uhsnmbntmyq7psfmk7wirr")
+    mattermost.notify(text=u"私が田中だ! ちょっとおもしろいことを")
+    msglist = message.getAllMessage()
+    print(msglist)
+    myword = message.returnMessage(msglist)
+    print(myword)
+    mattermost.notify(text=myword)
+    mattermost.notify(text=u"なんちゃって!")
 
 if __name__ == '__main__':
-    app.debug = True
-    app.run(host='0.0.0.0', port=80)
+    #msglist = message.getAllMessage()
+    #print(msglist)
+    app.run(host='0.0.0.0', port=8080)
+
